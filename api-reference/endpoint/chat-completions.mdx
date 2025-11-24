@@ -1,0 +1,222 @@
+---
+title: 'Chat Completions'
+description: 'Create chat completions using CTGT AI models'
+---
+
+## Overview
+
+The chat completions endpoint allows you to interact with CTGT AI models to generate responses based on conversation history.
+
+**Endpoint:** `https://api.ctgt.ai/v1/chat/completions`
+
+**Method:** `POST`
+
+## Authentication
+
+All requests require a Bearer token in the Authorization header:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | The model to use (e.g., `gemini-2.5-flash-lite`) |
+| `messages` | array | Yes | Array of message objects with `role` and `content` |
+| `persona` | string | No | The persona to use (default: `"default"`) |
+| `temperature` | number | No | Controls randomness (0-2, default: 1) |
+| `stream` | boolean | No | Whether to stream the response (default: false) |
+| `user` | string | No | Unique identifier for the end-user |
+
+## Available Personas
+
+Choose from the following personas to customize the model's behavior:
+
+1. **default** - Standard balanced responses
+2. **technical_expert** - Detailed technical explanations
+3. **creative_writer** - Creative and engaging content
+4. **educator** - Clear, teaching-oriented responses
+5. **safety_first** - Extra emphasis on safety and caution
+
+## Code Examples
+
+<CodeGroup>
+
+```python Python (requests)
+import requests
+import json
+
+url = "https://api.ctgt.ai/v1/chat/completions"
+api_key = "YOUR_API_KEY"
+
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+}
+
+payload = {
+    "model": "gemini-2.5-flash-lite",
+    "persona": "default", 
+    "messages": [
+        {
+            "role": "user",
+            "content": "Tell me of the weather now!"
+        }
+    ],
+    "temperature": 1,
+    "stream": False, 
+    "user": "user-123",
+}
+
+try:
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+    print(json.dumps(response.json(), indent=2))
+except Exception as e:
+    print(f"Error: {e}")
+```
+
+```python Python (OpenAI SDK)
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.ctgt.ai/v1",
+    api_key="YOUR_API_KEY"
+)
+
+try:
+    response = client.chat.completions.create(
+        model="gemini-2.5-flash-lite",
+        messages=[
+            {"role": "user", "content": "Tell me of the weather now!"}
+        ],
+        extra_body={
+            "persona": "default"
+        }
+    )
+
+    print(response.choices[0].message.content)
+
+except Exception as e:
+    print(f"An error occurred: {e}")
+```
+
+```javascript JavaScript (fetch)
+const url = "https://api.ctgt.ai/v1/chat/completions";
+const apiKey = "YOUR_API_KEY";
+
+const payload = {
+  model: "gemini-2.5-flash-lite",
+  persona: "default",
+  messages: [
+    {
+      role: "user",
+      content: "Tell me of the weather now!"
+    }
+  ],
+  temperature: 1,
+  stream: false,
+  user: "user-123"
+};
+
+fetch(url, {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${apiKey}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(payload)
+})
+  .then(response => response.json())
+  .then(data => console.log(JSON.stringify(data, null, 2)))
+  .catch(error => console.error("Error:", error));
+```
+
+```bash cURL
+curl -X POST "https://api.ctgt.ai/v1/chat/completions" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash-lite",
+    "persona": "default",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Tell me of the weather now!"
+      }
+    ],
+    "temperature": 1,
+    "stream": false,
+    "user": "user-123"
+  }'
+```
+
+</CodeGroup>
+
+## Response Format
+
+A successful response returns a JSON object with the following structure:
+
+```json
+{
+  "id": "chatcmpl-123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "model": "gemini-2.5-flash-lite",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "I don't have access to real-time weather data..."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 9,
+    "completion_tokens": 12,
+    "total_tokens": 21
+  }
+}
+```
+
+## Error Handling
+
+The API returns standard HTTP status codes:
+
+- **200**: Successful request
+- **400**: Bad request (invalid parameters)
+- **401**: Unauthorized (invalid API key)
+- **429**: Rate limit exceeded
+- **500**: Internal server error
+
+Example error response:
+
+```json
+{
+  "error": {
+    "message": "Invalid API key provided",
+    "type": "invalid_request_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+## Best Practices
+
+<Tip>
+  **Pro tip:** Use the [`persona`](api-reference/endpoint/chat-completions.mdx#available-personas) parameter to tailor responses to your specific use case without changing your prompts.
+</Tip>
+
+<Warning>
+  Always keep your API key secure and never expose it in client-side code. Use environment variables or secure key management systems.
+</Warning>
+
+- Start with `temperature: 1` for balanced responses
+- Use `temperature < 1` for more focused, deterministic outputs
+- Use `temperature > 1` for more creative, varied responses
+- Implement proper error handling for production applications
+- Consider using streaming for better user experience with long responses
