@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "CTGT API",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#0718F4",
+    "light": "#BE9030",
+    "dark": "#0718F4"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -31,12 +31,11 @@
     "primary": {
       "type": "button",
       "label": "Contact Sales",
-      "href": "mailto:james@ctgt.ai"
+      "href": "https://www.ctgt.ai/contact-us"
     }
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/your-org",
       "linkedin": "https://www.linkedin.com/company/ctgt/"
     }
   }
