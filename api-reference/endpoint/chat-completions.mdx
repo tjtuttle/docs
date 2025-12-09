@@ -90,7 +90,7 @@ try:
     response = client.chat.completions.create(
         model="gemini-2.5-flash-lite",
         messages=[
-            {"role": "user", "content": "Tell me of the weather now!"}
+            {"role": "user", "content": "Why is the sky blue?"}
         ],
         extra_body={
             "persona": "default"
@@ -113,7 +113,7 @@ const payload = {
   messages: [
     {
       role: "user",
-      content: "Tell me of the weather now!"
+      content: "Why is the sky blue?"
     }
   ],
   temperature: 1,
@@ -144,7 +144,7 @@ curl -X POST "https://api.ctgt.ai/v1/chat/completions" \
     "messages": [
       {
         "role": "user",
-        "content": "Tell me of the weather now!"
+        "content": "Why is the sky blue?"
       }
     ],
     "temperature": 1,
@@ -170,7 +170,7 @@ A successful response returns a JSON object with the following structure:
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "I don't have access to real-time weather data..."
+        "content": "The sky appears blue due to a phenomenon..."
       },
       "finish_reason": "stop"
     }
@@ -208,7 +208,7 @@ Example error response:
 ## Best Practices
 
 <Tip>
-  **Pro tip:** Use the [`persona`](api-reference/endpoint/chat-completions.mdx#available-personas) parameter to tailor responses to your specific use case without changing your prompts.
+  **Pro tip:** Use the [`persona`] parameter to tailor responses to your specific use case without changing your prompts.
 </Tip>
 
 <Warning>
