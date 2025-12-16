@@ -78,6 +78,11 @@
   "navbar": {
     "primary": {
       "type": "button",
+      "label": "Get API Key",
+      "href": "https://dashboard.ctgt.ai"
+    },
+    "secondary": {
+      "type": "button",
       "label": "Contact Sales",
       "href": "https://www.ctgt.ai/contact-us"
     }

@@ -172,12 +172,6 @@ class ConversationManager:
         self.url = "https://api.ctgt.ai/v1/chat/completions"
         self.messages = []
         
-    def add_system_message(self, content: str):
-        """Set system prompt"""
-        self.messages.append({
-            "role": "system",
-            "content": content
-        })
     
     def send_message(self, user_message: str) -> str:
         """Send message and get response"""
@@ -220,11 +214,6 @@ class ConversationManager:
 conversation = ConversationManager(
     api_key="sk-ctgt-YOUR_API_KEY",
     model="claude-sonnet-4-5-20250929"
-)
-
-# Set system prompt
-conversation.add_system_message(
-    "You are a helpful coding assistant. Provide clear, concise answers."
 )
 
 # Multi-turn conversation
@@ -440,7 +429,7 @@ curl -X POST https://api.ctgt.ai/v1/chat/completions \
   }'
 ```
 
-### With Temperature and Max Tokens
+### With Max Tokens
 
 ```bash
 curl -X POST https://api.ctgt.ai/v1/chat/completions \
@@ -449,10 +438,8 @@ curl -X POST https://api.ctgt.ai/v1/chat/completions \
   -d '{
     "model": "claude-sonnet-4-5-20250929",
     "messages": [
-      {"role": "system", "content": "You are a helpful assistant."},
       {"role": "user", "content": "Explain quantum computing"}
     ],
-    "temperature": 0.7,
     "max_tokens": 500
   }'
 ```
@@ -747,7 +734,7 @@ else:
 
 <CardGroup cols={2}>
   <Card title="API Features" icon="wand-magic-sparkles" href="/api-reference/api-features">
-    Learn about streaming, temperature, and more
+    Learn about streaming and advanced features
   </Card>
   
   <Card title="Models & Pricing" icon="layer-group" href="/api-reference/models-pricing">

@@ -26,8 +26,8 @@ Authorization: Bearer YOUR_API_KEY
 | `model` | string | Yes | The model to use (e.g., `gemini-2.5-flash-lite`) |
 | `messages` | array | Yes | Array of message objects with `role` and `content` |
 | `persona` | string | No | The persona to use (default: `"default"`) |
-| `temperature` | number | No | Controls randomness (0-2, default: 1) |
 | `stream` | boolean | No | Whether to stream the response (default: false) |
+| `max_tokens` | integer | No | Maximum tokens to generate |
 | `user` | string | No | Unique identifier for the end-user |
 
 ## Available Personas
@@ -60,15 +60,14 @@ headers = {
 
 payload = {
     "model": "gemini-2.5-flash-lite",
-    "persona": "default", 
+    "persona": "default",
     "messages": [
         {
             "role": "user",
             "content": "Why is the sky blue?"
         }
     ],
-    "temperature": 1,
-    "stream": False, 
+    "stream": False,
     "user": "user-123",
 }
 
@@ -118,7 +117,6 @@ const payload = {
       content: "Why is the sky blue?"
     }
   ],
-  temperature: 1,
   stream: false,
   user: "user-123"
 };
@@ -149,7 +147,6 @@ curl -X POST "https://api.ctgt.ai/v1/chat/completions" \
         "content": "Why is the sky blue?"
       }
     ],
-    "temperature": 1,
     "stream": false,
     "user": "user-123"
   }'
@@ -217,8 +214,7 @@ Example error response:
   Always keep your API key secure and never expose it in client-side code. Use environment variables or secure key management systems.
 </Warning>
 
-- Start with `temperature: 1` for balanced responses
-- Use `temperature < 1` for more focused, deterministic outputs
-- Use `temperature > 1` for more creative, varied responses
+- Use appropriate personas to tailor responses to your use case
 - Implement proper error handling for production applications
 - Consider using streaming for better user experience with long responses
+- Monitor your API usage and rate limits regularly
