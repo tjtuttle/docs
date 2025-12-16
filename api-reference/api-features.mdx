@@ -1,0 +1,690 @@
+---
+title: 'Advanced Features'
+description: 'Unlock the full power of the CTGT API with streaming, custom prompts, and fine-tuning controls'
+---
+
+## Overview
+
+The CTGT API offers advanced features to customize and optimize your AI interactions:
+
+<CardGroup cols={2}>
+  <Card title="Streaming Responses" icon="water">
+    Real-time token-by-token output
+  </Card>
+  
+  <Card title="Temperature Control" icon="temperature-half">
+    Adjust creativity and randomness
+  </Card>
+  
+  <Card title="System Prompts" icon="message-code">
+    Define AI personality and behavior
+  </Card>
+  
+  <Card title="Token Limits" icon="ruler">
+    Control response length and costs
+  </Card>
+</CardGroup>
+
+---
+
+## Streaming Responses
+
+Get responses in real-time as they're generated, similar to ChatGPT's typing effect.
+
+### Enable Streaming
+
+Set `stream: true` in your request:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "user", "content": "Write a short story"}
+    ],
+    "stream": true
+  }'
+```
+
+```python Python
+import requests
+import json
+
+api_key = "sk-ctgt-YOUR_API_KEY"
+url = "https://api.ctgt.ai/v1/chat/completions"
+
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "model": "gemini-2.5-flash",
+    "messages": [
+        {"role": "user", "content": "Write a short story"}
+    ],
+    "stream": True
+}
+
+response = requests.post(url, headers=headers, json=data, stream=True)
+
+for line in response.iter_lines():
+    if line:
+        line = line.decode('utf-8')
+        if line.startswith('data: '):
+            data_str = line[6:]  # Remove 'data: ' prefix
+            if data_str == '[DONE]':
+                break
+            try:
+                chunk = json.loads(data_str)
+                content = chunk['choices'][0]['delta'].get('content', '')
+                print(content, end='', flush=True)
+            except json.JSONDecodeError:
+                pass
+print()
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.ctgt.ai/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer sk-ctgt-YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    model: 'gemini-2.5-flash',
+    messages: [
+      { role: 'user', content: 'Write a short story' }
+    ],
+    stream: true
+  })
+});
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  
+  const chunk = decoder.decode(value);
+  const lines = chunk.split('\n');
+  
+  for (const line of lines) {
+    if (line.startsWith('data: ')) {
+      const data = line.slice(6);
+      if (data === '[DONE]') break;
+      try {
+        const parsed = JSON.parse(data);
+        const content = parsed.choices[0].delta.content || '';
+        process.stdout.write(content);
+      } catch (e) {}
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+### Streaming Response Format
+
+**Server-Sent Events (SSE):**
+```
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1702847123,"model":"gemini-2.5-flash","choices":[{"index":0,"delta":{"content":"Once"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1702847123,"model":"gemini-2.5-flash","choices":[{"index":0,"delta":{"content":" upon"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1702847123,"model":"gemini-2.5-flash","choices":[{"index":0,"delta":{"content":" a"},"finish_reason":null}]}
+
+...
+
+data: [DONE]
+```
+
+### When to Use Streaming
+
+<CardGroup cols={2}>
+  <Card title="Interactive Applications" icon="messages">
+    Chat interfaces, chatbots, conversational UIs
+  </Card>
+  
+  <Card title="Long-Form Content" icon="book">
+    Articles, reports, stories, documentation
+  </Card>
+  
+  <Card title="Better UX" icon="face-smile">
+    Show progress, reduce perceived latency
+  </Card>
+  
+  <Card title="Real-Time Feedback" icon="bolt">
+    Users see responses immediately
+  </Card>
+</CardGroup>
+
+<Tip>
+Streaming is ideal for user-facing applications where showing incremental progress improves the experience.
+</Tip>
+
+---
+
+## Temperature Control
+
+Adjust the randomness and creativity of AI responses.
+
+### Temperature Scale
+
+```
+0.0 ←─────────── 1.0 ────────────→ 2.0
+Deterministic    Balanced     Creative
+   Focused                      Random
+```
+
+### Setting Temperature
+
+<CodeGroup>
+
+```bash Low Temperature (0.0-0.3)
+curl -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "user", "content": "What is 2+2?"}
+    ],
+    "temperature": 0.0
+  }'
+```
+
+```bash Balanced Temperature (0.7-1.0)
+curl -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "user", "content": "Tell me about AI"}
+    ],
+    "temperature": 1.0
+  }'
+```
+
+```bash High Temperature (1.5-2.0)
+curl -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "user", "content": "Write a creative poem"}
+    ],
+    "temperature": 1.8
+  }'
+```
+
+</CodeGroup>
+
+### Temperature Use Cases
+
+| Temperature | Best For | Example Use Cases |
+|-------------|----------|-------------------|
+| **0.0 - 0.3** | Factual, deterministic | Math, code, data extraction, classification |
+| **0.4 - 0.7** | Balanced responses | General Q&A, summarization, translation |
+| **0.8 - 1.2** | Creative variation | Content writing, brainstorming |
+| **1.3 - 2.0** | Maximum creativity | Poetry, fiction, artistic content |
+
+<Warning>
+Higher temperatures increase randomness and may reduce accuracy. Use lower temperatures for factual tasks.
+</Warning>
+
+---
+
+## System Prompts
+
+Define the AI's personality, role, and behavior using system messages.
+
+### Basic System Prompt
+
+<CodeGroup>
+
+```python Python
+import requests
+
+api_key = "sk-ctgt-YOUR_API_KEY"
+url = "https://api.ctgt.ai/v1/chat/completions"
+
+data = {
+    "model": "claude-sonnet-4-5-20250929",
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a expert financial analyst specializing in tech stocks. Provide detailed, data-driven analysis."
+        },
+        {
+            "role": "user",
+            "content": "Should I invest in AI companies?"
+        }
+    ]
+}
+
+response = requests.post(url, headers={"Authorization": f"Bearer {api_key}"}, json=data)
+print(response.json()['choices'][0]['message']['content'])
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.ctgt.ai/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer sk-ctgt-YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    model: 'claude-sonnet-4-5-20250929',
+    messages: [
+      {
+        role: 'system',
+        content: 'You are a expert financial analyst specializing in tech stocks. Provide detailed, data-driven analysis.'
+      },
+      {
+        role: 'user',
+        content: 'Should I invest in AI companies?'
+      }
+    ]
+  })
+});
+```
+
+</CodeGroup>
+
+### System Prompt Examples
+
+<AccordionGroup>
+  <Accordion title="Technical Expert">
+    ```json
+    {
+      "role": "system",
+      "content": "You are a senior software engineer with 15 years of experience. Provide detailed technical explanations with code examples. Focus on best practices, performance, and maintainability."
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Creative Writer">
+    ```json
+    {
+      "role": "system",
+      "content": "You are a bestselling fiction author. Write engaging, descriptive prose with vivid imagery. Use literary techniques like metaphors, foreshadowing, and character development."
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Code Reviewer">
+    ```json
+    {
+      "role": "system",
+      "content": "You are a meticulous code reviewer. Analyze code for bugs, security issues, performance problems, and style violations. Provide constructive feedback with specific suggestions."
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Customer Support">
+    ```json
+    {
+      "role": "system",
+      "content": "You are a friendly and helpful customer support representative. Be empathetic, patient, and solution-oriented. Always maintain a positive tone and provide clear, actionable steps."
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Data Analyst">
+    ```json
+    {
+      "role": "system",
+      "content": "You are a data analyst expert in statistics and visualization. Provide insights with numbers, trends, and data-driven recommendations. Explain complex concepts clearly."
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Multi-Turn Conversations
+
+Maintain context across multiple messages:
+
+```python
+messages = [
+    {"role": "system", "content": "You are a helpful coding assistant."},
+    {"role": "user", "content": "Write a Python function to calculate fibonacci"},
+    {"role": "assistant", "content": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)"},
+    {"role": "user", "content": "Now optimize it with memoization"}
+]
+
+response = requests.post(url, headers=headers, json={
+    "model": "gpt-5",
+    "messages": messages
+})
+```
+
+<Tip>
+System prompts are processed first and set the behavior for the entire conversation. They're ideal for defining roles, constraints, and output formats.
+</Tip>
+
+---
+
+## Token Limits
+
+Control response length and manage costs with `max_tokens`.
+
+### Setting Token Limits
+
+<CodeGroup>
+
+```bash Short Response (100 tokens)
+curl -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "user", "content": "Summarize quantum physics"}
+    ],
+    "max_tokens": 100
+  }'
+```
+
+```python Medium Response (500 tokens)
+data = {
+    "model": "gemini-2.5-flash",
+    "messages": [
+        {"role": "user", "content": "Explain machine learning"}
+    ],
+    "max_tokens": 500
+}
+```
+
+```javascript Long Response (2000 tokens)
+const data = {
+  model: 'gemini-2.5-flash',
+  messages: [
+    { role: 'user', content: 'Write a detailed essay on AI ethics' }
+  ],
+  max_tokens: 2000
+};
+```
+
+</CodeGroup>
+
+### Token Guidelines
+
+| Tokens | Approximate Length | Best For |
+|--------|-------------------|----------|
+| **50-100** | 1-2 short paragraphs | Quick answers, summaries |
+| **200-500** | 1-2 medium paragraphs | Explanations, descriptions |
+| **500-1000** | 1-2 pages | Detailed responses, articles |
+| **1000-2000** | 2-4 pages | Long-form content, essays |
+| **2000+** | Multiple pages | Reports, documentation |
+
+<Note>
+**1 token ≈ 4 characters** or **¾ of a word** in English.
+</Note>
+
+### Cost Impact
+
+```python
+# Example: 1000-token response
+# Gemini 2.5 Flash: $0.0027
+# Claude Sonnet 4.5: $0.017
+# Claude Opus 4.5: $0.030
+
+# Setting max_tokens=200 reduces costs by 80%
+```
+
+---
+
+## Advanced Parameters
+
+### Top P (Nucleus Sampling)
+
+Alternative to temperature for controlling randomness:
+
+```json
+{
+  "model": "gemini-2.5-flash",
+  "messages": [...],
+  "top_p": 0.9
+}
+```
+
+- `top_p: 1.0` - Consider all tokens (default)
+- `top_p: 0.9` - Consider top 90% probability mass
+- `top_p: 0.1` - Only most likely tokens
+
+### Presence Penalty
+
+Encourage topic diversity:
+
+```json
+{
+  "model": "gpt-5",
+  "messages": [...],
+  "presence_penalty": 0.6
+}
+```
+
+- Range: `-2.0` to `2.0`
+- Positive values encourage new topics
+- Negative values encourage repetition
+
+### Frequency Penalty
+
+Reduce repetition:
+
+```json
+{
+  "model": "gpt-5",
+  "messages": [...],
+  "frequency_penalty": 0.5
+}
+```
+
+- Range: `-2.0` to `2.0`
+- Positive values reduce word repetition
+- Higher values = more diverse vocabulary
+
+---
+
+## Combining Features
+
+### Example: Production Chat Application
+
+```python
+import requests
+import json
+
+def chat_completion(
+    api_key: str,
+    user_message: str,
+    conversation_history: list = None,
+    model: str = "gemini-2.5-flash",
+    streaming: bool = True,
+    temperature: float = 0.7,
+    max_tokens: int = 500
+):
+    """
+    Complete chat request with all advanced features
+    """
+    url = "https://api.ctgt.ai/v1/chat/completions"
+    
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    # Build messages with history
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant. Be concise and accurate."
+        }
+    ]
+    
+    if conversation_history:
+        messages.extend(conversation_history)
+    
+    messages.append({
+        "role": "user",
+        "content": user_message
+    })
+    
+    # Request payload
+    data = {
+        "model": model,
+        "messages": messages,
+        "stream": streaming,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "presence_penalty": 0.1,
+        "frequency_penalty": 0.1
+    }
+    
+    response = requests.post(url, headers=headers, json=data, stream=streaming)
+    
+    if streaming:
+        # Handle streaming response
+        full_response = ""
+        for line in response.iter_lines():
+            if line:
+                line = line.decode('utf-8')
+                if line.startswith('data: '):
+                    data_str = line[6:]
+                    if data_str == '[DONE]':
+                        break
+                    try:
+                        chunk = json.loads(data_str)
+                        content = chunk['choices'][0]['delta'].get('content', '')
+                        full_response += content
+                        print(content, end='', flush=True)
+                    except json.JSONDecodeError:
+                        pass
+        print()
+        return full_response
+    else:
+        # Handle non-streaming response
+        result = response.json()
+        return result['choices'][0]['message']['content']
+
+# Usage
+conversation = []
+
+response1 = chat_completion(
+    api_key="sk-ctgt-YOUR_API_KEY",
+    user_message="What is machine learning?",
+    conversation_history=conversation,
+    streaming=True,
+    temperature=0.7
+)
+
+conversation.append({"role": "user", "content": "What is machine learning?"})
+conversation.append({"role": "assistant", "content": response1})
+
+response2 = chat_completion(
+    api_key="sk-ctgt-YOUR_API_KEY",
+    user_message="Give me a code example",
+    conversation_history=conversation,
+    streaming=True,
+    temperature=0.3  # Lower for code
+)
+```
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Optimize Temperature" icon="temperature-half">
+    - Use 0.0-0.3 for factual tasks
+    - Use 0.7-1.0 for general content
+    - Use 1.5+ for creative writing
+  </Card>
+  
+  <Card title="Set Token Limits" icon="ruler">
+    - Prevent excessive costs
+    - Control response length
+    - Match your UI constraints
+  </Card>
+  
+  <Card title="Use System Prompts" icon="message-code">
+    - Define clear roles
+    - Set output formats
+    - Establish constraints
+  </Card>
+  
+  <Card title="Enable Streaming" icon="water">
+    - Better user experience
+    - Show progress in real-time
+    - Ideal for chat interfaces
+  </Card>
+</CardGroup>
+
+### Error Handling
+
+```python
+def safe_api_call(api_key, messages, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(
+                "https://api.ctgt.ai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}"},
+                json={
+                    "model": "gemini-2.5-flash",
+                    "messages": messages,
+                    "max_tokens": 500,
+                    "temperature": 0.7
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code == 429:
+                # Rate limit - wait and retry
+                time.sleep(2 ** attempt)
+                continue
+            else:
+                print(f"Error: {response.status_code}")
+                return None
+                
+        except requests.exceptions.Timeout:
+            print(f"Timeout on attempt {attempt + 1}")
+            if attempt < max_retries - 1:
+                continue
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
+    return None
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Code Examples" icon="code" href="/api-reference/code-examples">
+    See complete SDK implementations
+  </Card>
+  
+  <Card title="Models & Pricing" icon="layer-group" href="/api-reference/models-pricing">
+    Choose the right model for your needs
+  </Card>
+  
+  <Card title="Subscription & Billing" icon="credit-card" href="/api-reference/subscription-billing">
+    Manage your subscription and usage
+  </Card>
+  
+  <Card title="Chat Completions API" icon="messages" href="/api-reference/endpoint/chat-completions">
+    Full API reference
+  </Card>
+</CardGroup>

@@ -1,0 +1,278 @@
+---
+title: 'Models & Pricing'
+description: 'Complete guide to available AI models and pricing structure'
+---
+
+## Overview
+
+CTGT API provides access to 11 state-of-the-art AI models across different tiers. All pricing is **pay-as-you-go** based on token usage.
+
+<Note>
+Pricing is per **1 million tokens** (1M tokens). You only pay for what you use.
+</Note>
+
+---
+
+## Free Tier Models
+
+Available immediately upon signup - no credit card required:
+
+<CardGroup cols={3}>
+  <Card title="Gemini 2.5 Flash" icon="bolt">
+    Fast and efficient for general tasks
+    
+    **Model:** `gemini-2.5-flash`
+    
+    **Pricing (per 1M tokens):**
+    - Input: $0.50
+    - Output: $2.70
+  </Card>
+  
+  <Card title="Gemini 2.5 Flash Lite" icon="feather">
+    Lightweight for simple queries
+    
+    **Model:** `gemini-2.5-flash-lite`
+    
+    **Pricing (per 1M tokens):**
+    - Input: $0.30
+    - Output: $0.60
+  </Card>
+  
+  <Card title="Claude Haiku 4.5" icon="rabbit-running">
+    Fast Claude model
+    
+    **Model:** `claude-haiku-4-5-20251001`
+    
+    **Pricing (per 1M tokens):**
+    - Input: $1.20
+    - Output: $5.20
+  </Card>
+</CardGroup>
+
+---
+
+## Paid Tier Models
+
+Unlock all models with a paid subscription:
+
+### Premium Claude Models
+
+<CardGroup cols={2}>
+  <Card title="Claude Sonnet 4.5" icon="brain">
+    Balanced intelligence and speed
+    
+    **Model:** `claude-sonnet-4-5-20250929`
+    
+    **Pricing (per 1M tokens):**
+    - Input: $5.00
+    - Output: $17.00
+    
+    **Best for:** Complex reasoning, analysis, creative writing
+  </Card>
+  
+  <Card title="Claude Opus 4.5" icon="crown">
+    Most capable Claude model
+    
+    **Model:** `claude-opus-4-5-20251101`
+    
+    **Pricing (per 1M tokens):**
+    - Input: $10.00
+    - Output: $30.00
+    
+    **Best for:** Research, expert-level tasks, multi-step reasoning
+  </Card>
+</CardGroup>
+
+### GPT-5 Model Family
+
+<CardGroup cols={2}>
+  <Card title="GPT-5" icon="microchip">
+    Advanced reasoning capabilities
+    
+    **Model:** `gpt-5`
+    
+    **Pricing (per 1M tokens):**
+    - Input: $3.25
+    - Output: $12.00
+    
+    **Best for:** General-purpose tasks, coding, analysis
+  </Card>
+  
+  <Card title="GPT-5.2 Pro" icon="star">
+    Professional-grade performance
+    
+    **Model:** `gpt-5.2-pro`
+    
+    **Pricing (per 1M tokens):**
+    - Input: $6.75
+    - Output: $19.00
+    
+    **Best for:** Production applications, enterprise use
+  </Card>
+  
+  <Card title="GPT-5.2" icon="sparkles">
+    Enhanced GPT-5 with improvements
+    
+    **Model:** `gpt-5.2`
+    
+    **Pricing (per 1M tokens):**
+    - Input: $6.75
+    - Output: $19.00
+    
+    **Best for:** Advanced tasks, better accuracy
+  </Card>
+  
+  <Card title="GPT-5 Mini" icon="cube">
+    Compact GPT-5 variant
+    
+    **Model:** `gpt-5-mini`
+    
+    **Pricing (per 1M tokens):**
+    - Input: $3.25
+    - Output: $12.00
+    
+    **Best for:** Cost-effective GPT-5 access
+  </Card>
+  
+  <Card title="GPT-5 Nano" icon="atom">
+    Ultra-efficient model
+    
+    **Model:** `gpt-5-nano`
+    
+    **Pricing (per 1M tokens):**
+    - Input: $0.25
+    - Output: $0.60
+    
+    **Best for:** High-volume, simple tasks
+  </Card>
+</CardGroup>
+
+### Advanced Gemini Models
+
+<Card title="Gemini 3 Pro" icon="gem">
+  Next-generation Gemini
+  
+  **Model:** `gemini-3-pro`
+  
+  **Pricing (per 1M tokens):**
+  - Input: $4.00
+  - Output: $14.00
+  
+  **Best for:** Multimodal tasks, complex reasoning
+</Card>
+
+---
+
+## Complete Pricing Table
+
+| Model | Tier | Input (per 1M tokens) | Output (per 1M tokens) | Best Use Case |
+|-------|------|----------------------|------------------------|---------------|
+| `gemini-2.5-flash-lite` | Free | $0.30 | $0.60 | Simple queries, high volume |
+| `gemini-2.5-flash` | Free | $0.50 | $2.70 | General tasks, fast responses |
+| `gpt-5-nano` | Paid | $0.25 | $0.60 | Ultra-efficient processing |
+| `claude-haiku-4-5-20251001` | Free | $1.20 | $5.20 | Fast Claude responses |
+| `gpt-5` | Paid | $3.25 | $12.00 | Advanced reasoning |
+| `gpt-5-mini` | Paid | $3.25 | $12.00 | Cost-effective GPT-5 |
+| `gemini-3-pro` | Paid | $4.00 | $14.00 | Next-gen capabilities |
+| `claude-sonnet-4-5-20250929` | Paid | $5.00 | $17.00 | Balanced intelligence |
+| `gpt-5.2` | Paid | $6.75 | $19.00 | Enhanced performance |
+| `gpt-5.2-pro` | Paid | $6.75 | $19.00 | Professional applications |
+| `claude-opus-4-5-20251101` | Paid | $10.00 | $30.00 | Expert-level tasks |
+
+
+---
+
+---
+
+## Switching Between Models
+
+You can easily switch between models by changing the `model` parameter:
+
+<CodeGroup>
+
+```bash Free Tier Model
+curl -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+```bash Paid Tier Model
+curl -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-5-20250929",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+</CodeGroup>
+
+---
+
+## Model Availability Check
+
+You can check which models are available for your tier:
+
+```bash
+curl https://api.ctgt.ai/v1/subscription/info \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY"
+```
+
+**Response includes:**
+```json
+{
+  "subscription_tier": "free",
+  "available_models": [
+    {
+      "model": "gemini-2.5-flash",
+      "display_name": "Gemini 2.5 Flash",
+      "tier": "free",
+      "pricing": {
+        "input": 0.50,
+        "output": 2.70
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Upgrade to Access All Models
+
+<Card title="Unlock All 11 Models" icon="unlock" href="/api-reference/subscription-billing">
+  Upgrade to paid tier for:
+  - Access to all 11 models
+  - 100x higher rate limits
+  - Priority support
+  - Production-ready infrastructure
+  
+  **Starting at $10/month** + pay-as-you-go usage
+</Card>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Upgrade to Paid" icon="arrow-up" href="/api-reference/subscription-billing">
+    Unlock all models and higher limits
+  </Card>
+  
+  <Card title="API Features" icon="wand-magic-sparkles" href="/api-reference/api-features">
+    Learn about streaming, temperature, and more
+  </Card>
+  
+  <Card title="Code Examples" icon="code" href="/api-reference/code-examples">
+    See complete implementation examples
+  </Card>
+  
+  <Card title="Monitor Usage" icon="chart-line" href="/api-reference/subscription-billing#billing-usage">
+    Track your token usage and costs
+  </Card>
+</CardGroup>

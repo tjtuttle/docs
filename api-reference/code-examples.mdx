@@ -1,0 +1,764 @@
+---
+title: 'Code Examples'
+description: 'Complete implementation examples in multiple programming languages'
+---
+
+## Overview
+
+This guide provides practical code examples for integrating the CTGT API using standard libraries and HTTP clients. All examples use direct API calls without custom SDKs.
+
+<Note>
+These examples use standard HTTP libraries available in each language. No special CTGT SDK installation required.
+</Note>
+
+---
+
+## Python Examples
+
+### Basic Request
+
+```python
+import requests
+
+api_key = "sk-ctgt-YOUR_API_KEY"
+url = "https://api.ctgt.ai/v1/chat/completions"
+
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "model": "gemini-2.5-flash",
+    "messages": [
+        {"role": "user", "content": "Hello! What can you help me with?"}
+    ]
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+
+print(result['choices'][0]['message']['content'])
+```
+
+### Streaming Response
+
+```python
+import requests
+import json
+
+api_key = "sk-ctgt-YOUR_API_KEY"
+url = "https://api.ctgt.ai/v1/chat/completions"
+
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "model": "gemini-2.5-flash",
+    "messages": [
+        {"role": "user", "content": "Tell me a story"}
+    ],
+    "stream": True
+}
+
+response = requests.post(url, headers=headers, json=data, stream=True)
+
+for line in response.iter_lines():
+    if line:
+        line = line.decode('utf-8')
+        if line.startswith('data: '):
+            data_str = line[6:]  # Remove 'data: ' prefix
+            if data_str == '[DONE]':
+                break
+            try:
+                chunk = json.loads(data_str)
+                content = chunk['choices'][0]['delta'].get('content', '')
+                print(content, end='', flush=True)
+            except json.JSONDecodeError:
+                pass
+print()  # New line at end
+```
+
+### Error Handling & Retries
+
+```python
+import requests
+import time
+from typing import Optional, Dict, Any
+
+def api_call_with_retry(
+    api_key: str,
+    messages: list,
+    model: str = "gemini-2.5-flash",
+    max_retries: int = 3,
+    timeout: int = 30
+) -> Optional[Dict[Any, Any]]:
+    """
+    Make API call with automatic retry on rate limits
+    """
+    url = "https://api.ctgt.ai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    data = {
+        "model": model,
+        "messages": messages
+    }
+    
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(
+                url,
+                headers=headers,
+                json=data,
+                timeout=timeout
+            )
+            
+            # Success
+            if response.status_code == 200:
+                return response.json()
+            
+            # Rate limit - wait and retry
+            elif response.status_code == 429:
+                wait_time = 2 ** attempt  # Exponential backoff
+                print(f"Rate limited. Waiting {wait_time}s...")
+                time.sleep(wait_time)
+                continue
+            
+            # Other error
+            else:
+                print(f"Error {response.status_code}: {response.text}")
+                return None
+                
+        except requests.exceptions.Timeout:
+            print(f"Timeout on attempt {attempt + 1}")
+            if attempt < max_retries - 1:
+                time.sleep(1)
+                continue
+            return None
+            
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
+    print("Max retries exceeded")
+    return None
+
+# Usage
+result = api_call_with_retry(
+    api_key="sk-ctgt-YOUR_API_KEY",
+    messages=[
+        {"role": "user", "content": "What is machine learning?"}
+    ]
+)
+
+if result:
+    print(result['choices'][0]['message']['content'])
+```
+
+### Multi-Turn Conversation
+
+```python
+import requests
+
+class ConversationManager:
+    def __init__(self, api_key: str, model: str = "gemini-2.5-flash"):
+        self.api_key = api_key
+        self.model = model
+        self.url = "https://api.ctgt.ai/v1/chat/completions"
+        self.messages = []
+        
+    def add_system_message(self, content: str):
+        """Set system prompt"""
+        self.messages.append({
+            "role": "system",
+            "content": content
+        })
+    
+    def send_message(self, user_message: str) -> str:
+        """Send message and get response"""
+        # Add user message
+        self.messages.append({
+            "role": "user",
+            "content": user_message
+        })
+        
+        # Make API call
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "model": self.model,
+            "messages": self.messages
+        }
+        
+        response = requests.post(self.url, headers=headers, json=data)
+        result = response.json()
+        
+        # Extract assistant response
+        assistant_message = result['choices'][0]['message']['content']
+        
+        # Add to conversation history
+        self.messages.append({
+            "role": "assistant",
+            "content": assistant_message
+        })
+        
+        return assistant_message
+    
+    def clear_history(self):
+        """Clear conversation history"""
+        self.messages = []
+
+# Usage
+conversation = ConversationManager(
+    api_key="sk-ctgt-YOUR_API_KEY",
+    model="claude-sonnet-4-5-20250929"
+)
+
+# Set system prompt
+conversation.add_system_message(
+    "You are a helpful coding assistant. Provide clear, concise answers."
+)
+
+# Multi-turn conversation
+response1 = conversation.send_message("What is a Python decorator?")
+print(f"AI: {response1}\n")
+
+response2 = conversation.send_message("Can you show me an example?")
+print(f"AI: {response2}\n")
+
+response3 = conversation.send_message("Now explain the @property decorator")
+print(f"AI: {response3}")
+```
+
+---
+
+## JavaScript/Node.js Examples
+
+### Basic Request
+
+```javascript
+// Using fetch (Node.js 18+ or with node-fetch)
+const apiKey = "sk-ctgt-YOUR_API_KEY";
+const url = "https://api.ctgt.ai/v1/chat/completions";
+
+const response = await fetch(url, {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${apiKey}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    model: 'gemini-2.5-flash',
+    messages: [
+      { role: 'user', content: 'Hello! What can you help me with?' }
+    ]
+  })
+});
+
+const data = await response.json();
+console.log(data.choices[0].message.content);
+```
+
+### Using Axios
+
+```javascript
+const axios = require('axios');
+
+const apiKey = "sk-ctgt-YOUR_API_KEY";
+const url = "https://api.ctgt.ai/v1/chat/completions";
+
+async function chatCompletion(userMessage) {
+  try {
+    const response = await axios.post(
+      url,
+      {
+        model: 'gemini-2.5-flash',
+        messages: [
+          { role: 'user', content: userMessage }
+        ]
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    return response.data.choices[0].message.content;
+  } catch (error) {
+    if (error.response) {
+      console.error('API Error:', error.response.status, error.response.data);
+    } else {
+      console.error('Error:', error.message);
+    }
+    throw error;
+  }
+}
+
+// Usage
+chatCompletion("What is machine learning?")
+  .then(response => console.log(response))
+  .catch(error => console.error(error));
+```
+
+### Streaming Response
+
+```javascript
+const apiKey = "sk-ctgt-YOUR_API_KEY";
+const url = "https://api.ctgt.ai/v1/chat/completions";
+
+async function streamChat(userMessage) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'gemini-2.5-flash',
+      messages: [
+        { role: 'user', content: userMessage }
+      ],
+      stream: true
+    })
+  });
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    
+    const chunk = decoder.decode(value);
+    const lines = chunk.split('\n');
+    
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6);
+        if (data === '[DONE]') return;
+        
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices[0].delta.content || '';
+          process.stdout.write(content);
+        } catch (e) {
+          // Skip invalid JSON
+        }
+      }
+    }
+  }
+  console.log(); // New line
+}
+
+// Usage
+streamChat("Tell me a story");
+```
+
+### Error Handling with Retries
+
+```javascript
+async function apiCallWithRetry(
+  apiKey,
+  messages,
+  model = 'gemini-2.5-flash',
+  maxRetries = 3
+) {
+  const url = "https://api.ctgt.ai/v1/chat/completions";
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: messages
+        })
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      }
+      
+      if (response.status === 429) {
+        // Rate limit - exponential backoff
+        const waitTime = Math.pow(2, attempt) * 1000;
+        console.log(`Rate limited. Waiting ${waitTime}ms...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+      
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+      
+    } catch (error) {
+      if (attempt === maxRetries - 1) {
+        throw error;
+      }
+      console.log(`Attempt ${attempt + 1} failed, retrying...`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+}
+
+// Usage
+apiCallWithRetry(
+  "sk-ctgt-YOUR_API_KEY",
+  [{ role: 'user', content: 'Hello!' }]
+)
+  .then(result => console.log(result.choices[0].message.content))
+  .catch(error => console.error(error));
+```
+
+---
+
+## cURL Examples
+
+### Basic Request
+
+```bash
+curl -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "user", "content": "Hello!"}
+    ]
+  }'
+```
+
+### With Temperature and Max Tokens
+
+```bash
+curl -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-5-20250929",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "Explain quantum computing"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 500
+  }'
+```
+
+### Streaming Response
+
+```bash
+curl -N -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "user", "content": "Tell me a joke"}
+    ],
+    "stream": true
+  }'
+```
+
+### Complete Workflow Script
+
+```bash
+#!/bin/bash
+
+API_KEY="sk-ctgt-YOUR_API_KEY"
+BASE_URL="https://api.ctgt.ai"
+
+# Check subscription
+echo "Checking subscription..."
+curl -s "${BASE_URL}/v1/subscription/info" \
+  -H "Authorization: Bearer ${API_KEY}" | jq
+
+# Make a request
+echo -e "\nMaking API request..."
+RESPONSE=$(curl -s -X POST "${BASE_URL}/v1/chat/completions" \
+  -H "Authorization: Bearer ${API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "user", "content": "What is 2+2?"}
+    ]
+  }')
+
+echo "$RESPONSE" | jq '.choices[0].message.content'
+
+# Check usage
+echo -e "\nChecking usage..."
+curl -s "${BASE_URL}/v1/billing/usage" \
+  -H "Authorization: Bearer ${API_KEY}" | jq
+```
+
+---
+
+## Go Examples
+
+### Basic Request
+
+```go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "io"
+    "net/http"
+)
+
+type Message struct {
+    Role    string `json:"role"`
+    Content string `json:"content"`
+}
+
+type ChatRequest struct {
+    Model    string    `json:"model"`
+    Messages []Message `json:"messages"`
+}
+
+type ChatResponse struct {
+    Choices []struct {
+        Message Message `json:"message"`
+    } `json:"choices"`
+}
+
+func main() {
+    apiKey := "sk-ctgt-YOUR_API_KEY"
+    url := "https://api.ctgt.ai/v1/chat/completions"
+    
+    reqBody := ChatRequest{
+        Model: "gemini-2.5-flash",
+        Messages: []Message{
+            {Role: "user", Content: "Hello! What can you help me with?"},
+        },
+    }
+    
+    jsonData, err := json.Marshal(reqBody)
+    if err != nil {
+        panic(err)
+    }
+    
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+    if err != nil {
+        panic(err)
+    }
+    
+    req.Header.Set("Authorization", "Bearer "+apiKey)
+    req.Header.Set("Content-Type", "application/json")
+    
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+    
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        panic(err)
+    }
+    
+    var chatResp ChatResponse
+    if err := json.Unmarshal(body, &chatResp); err != nil {
+        panic(err)
+    }
+    
+    fmt.Println(chatResp.Choices[0].Message.Content)
+}
+```
+
+---
+
+## Ruby Examples
+
+### Basic Request
+
+```ruby
+require 'net/http'
+require 'json'
+require 'uri'
+
+api_key = "sk-ctgt-YOUR_API_KEY"
+uri = URI("https://api.ctgt.ai/v1/chat/completions")
+
+request = Net::HTTP::Post.new(uri)
+request["Authorization"] = "Bearer #{api_key}"
+request["Content-Type"] = "application/json"
+
+request.body = {
+  model: "gemini-2.5-flash",
+  messages: [
+    { role: "user", content: "Hello! What can you help me with?" }
+  ]
+}.to_json
+
+response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+  http.request(request)
+end
+
+result = JSON.parse(response.body)
+puts result["choices"][0]["message"]["content"]
+```
+
+---
+
+## PHP Examples
+
+### Basic Request
+
+```php
+<?php
+
+$apiKey = "sk-ctgt-YOUR_API_KEY";
+$url = "https://api.ctgt.ai/v1/chat/completions";
+
+$data = [
+    "model" => "gemini-2.5-flash",
+    "messages" => [
+        ["role" => "user", "content" => "Hello! What can you help me with?"]
+    ]
+];
+
+$options = [
+    "http" => [
+        "header" => [
+            "Authorization: Bearer " . $apiKey,
+            "Content-Type: application/json"
+        ],
+        "method" => "POST",
+        "content" => json_encode($data)
+    ]
+];
+
+$context = stream_context_create($options);
+$response = file_get_contents($url, false, $context);
+$result = json_decode($response, true);
+
+echo $result["choices"][0]["message"]["content"];
+?>
+```
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Store API Keys Securely" icon="key">
+    Use environment variables, never hardcode
+    ```bash
+    export CTGT_API_KEY="sk-ctgt-..."
+    ```
+  </Card>
+  
+  <Card title="Handle Errors Gracefully" icon="shield-check">
+    Implement retry logic with exponential backoff
+  </Card>
+  
+  <Card title="Monitor Rate Limits" icon="gauge">
+    Check headers: X-RateLimit-Remaining
+  </Card>
+  
+  <Card title="Use Timeouts" icon="clock">
+    Set reasonable timeout values (30s recommended)
+  </Card>
+</CardGroup>
+
+### Environment Variables
+
+**Python (.env file):**
+```python
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+api_key = os.getenv("CTGT_API_KEY")
+```
+
+**Node.js (.env file):**
+```javascript
+require('dotenv').config();
+const apiKey = process.env.CTGT_API_KEY;
+```
+
+**Bash:**
+```bash
+export CTGT_API_KEY="sk-ctgt-YOUR_API_KEY"
+echo $CTGT_API_KEY
+```
+
+---
+
+## Testing & Debugging
+
+### Check API Health
+
+```bash
+curl https://api.ctgt.ai/health
+```
+
+### Validate Response Structure
+
+```python
+import requests
+
+response = requests.post(
+    "https://api.ctgt.ai/v1/chat/completions",
+    headers={"Authorization": f"Bearer {api_key}"},
+    json={"model": "gemini-2.5-flash", "messages": [...]}
+)
+
+# Check status
+print(f"Status: {response.status_code}")
+
+# Check rate limits
+print(f"Remaining: {response.headers.get('X-RateLimit-Remaining')}")
+print(f"Limit: {response.headers.get('X-RateLimit-Limit')}")
+
+# Validate response
+if response.status_code == 200:
+    data = response.json()
+    assert 'choices' in data
+    assert len(data['choices']) > 0
+    assert 'message' in data['choices'][0]
+    print("✓ Response structure valid")
+else:
+    print(f"✗ Error: {response.text}")
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="API Features" icon="wand-magic-sparkles" href="/api-reference/api-features">
+    Learn about streaming, temperature, and more
+  </Card>
+  
+  <Card title="Models & Pricing" icon="layer-group" href="/api-reference/models-pricing">
+    Choose the right model for your needs
+  </Card>
+  
+  <Card title="Subscription & Billing" icon="credit-card" href="/api-reference/subscription-billing">
+    Manage your account and usage
+  </Card>
+  
+  <Card title="Chat Completions API" icon="messages" href="/api-reference/endpoint/chat-completions">
+    Full API reference
+  </Card>
+</CardGroup>

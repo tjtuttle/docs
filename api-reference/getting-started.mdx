@@ -1,0 +1,309 @@
+---
+title: 'Getting Started'
+description: 'Create your account and make your first API request in minutes'
+---
+
+## Quick Start
+
+Get started with the CTGT API in 3 simple steps:
+
+1. **Sign up** and verify your email
+2. **Get your API key**
+3. **Make your first request**
+
+---
+
+## Step 1: Create Your Account
+
+Create your account with email verification:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.ctgt.ai/v1/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "organization": "Acme Corp"
+  }'
+```
+
+```python Python
+import requests
+
+url = "https://api.ctgt.ai/v1/auth/signup"
+payload = {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "organization": "Acme Corp"
+}
+
+response = requests.post(url, json=payload)
+print(response.json())
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.ctgt.ai/v1/auth/signup', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'John Doe',
+    email: 'john@example.com',
+    organization: 'Acme Corp'
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+**Response:**
+```json
+{
+  "message": "Account created successfully. Please check your email to verify your account.",
+  "email": "john@example.com"
+}
+```
+
+---
+
+## Step 2: Verify Your Email
+
+Check your inbox for a verification email containing a link like:
+
+```
+https://api.ctgt.ai/v1/auth/verify?token=VERIFICATION_TOKEN
+```
+
+Click the link or make a GET request:
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.ctgt.ai/v1/auth/verify?token=VERIFICATION_TOKEN"
+```
+
+```python Python
+import requests
+
+token = "VERIFICATION_TOKEN"
+url = f"https://api.ctgt.ai/v1/auth/verify?token={token}"
+
+response = requests.get(url)
+data = response.json()
+print(f"API Key: {data['api_key']}")
+```
+
+</CodeGroup>
+
+**Response:**
+```json
+{
+  "message": "Email verified successfully!",
+  "email": "john@example.com",
+  "api_key": "sk-ctgt-abc123def456..."
+}
+```
+
+<Warning>
+**Save your API key!** You'll need it for all API requests. Store it securely and never share it publicly.
+</Warning>
+
+---
+
+## Step 3: Make Your First Request
+
+Now you can start making API requests using your API key:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST https://api.ctgt.ai/v1/chat/completions \
+  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-2.5-flash",
+    "messages": [
+      {"role": "user", "content": "Hello! What can you help me with?"}
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+api_key = "sk-ctgt-YOUR_API_KEY"
+url = "https://api.ctgt.ai/v1/chat/completions"
+
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "model": "gemini-2.5-flash",
+    "messages": [
+        {"role": "user", "content": "Hello! What can you help me with?"}
+    ]
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+print(result['choices'][0]['message']['content'])
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.ctgt.ai/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer sk-ctgt-YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    model: 'gemini-2.5-flash',
+    messages: [
+      { role: 'user', content: 'Hello! What can you help me with?' }
+    ]
+  })
+});
+
+const data = await response.json();
+console.log(data.choices[0].message.content);
+```
+
+</CodeGroup>
+
+**Response:**
+```json
+{
+  "id": "chatcmpl-123",
+  "object": "chat.completion",
+  "created": 1702847123,
+  "model": "gemini-2.5-flash",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello! I'm here to help you with a wide range of tasks..."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 15,
+    "completion_tokens": 42,
+    "total_tokens": 57
+  }
+}
+```
+
+---
+
+## What's Included with Free Tier
+
+Upon signup, you immediately get access to:
+
+<CardGroup cols={2}>
+  <Card title="3 Free Models" icon="robot">
+    - Gemini 2.5 Flash
+    - Gemini 2.5 Flash Lite
+    - Claude Haiku 4.5
+  </Card>
+  
+  <Card title="Generous Rate Limits" icon="gauge-high">
+    - 20 requests/minute
+    - 100 requests/hour
+    - 500 requests/day
+    - 100K tokens/day
+  </Card>
+  
+  <Card title="Pay-as-you-go Pricing" icon="dollar-sign">
+    Only pay for what you use
+    Starting at $0.30 per 1M tokens
+  </Card>
+  
+  <Card title="Production Ready" icon="rocket">
+    Full API access
+    Streaming support
+    No credit card required
+  </Card>
+</CardGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Explore Models" icon="layer-group" href="/api-reference/models-pricing">
+    Learn about all 11 available models and their pricing
+  </Card>
+  
+  <Card title="Upgrade to Paid" icon="arrow-up" href="/api-reference/subscription-billing">
+    Unlock all models and 100x higher rate limits
+  </Card>
+  
+  <Card title="Advanced Features" icon="wand-magic-sparkles" href="/api-reference/api-features">
+    Streaming, custom prompts, temperature control, and more
+  </Card>
+  
+  <Card title="Code Examples" icon="code" href="/api-reference/code-examples">
+    Complete SDKs in Python, JavaScript, and more
+  </Card>
+</CardGroup>
+
+---
+
+## Authentication
+
+All API requests require authentication using a Bearer token:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+Your API key:
+- Starts with `sk-ctgt-`
+- Is unique to your account
+- Should be kept secure and never shared
+- Can be regenerated if compromised
+
+<Tip>
+Store your API key as an environment variable:
+```bash
+export CTGT_API_KEY="sk-ctgt-YOUR_API_KEY"
+```
+</Tip>
+
+---
+
+## Base URL
+
+All API endpoints are accessed through:
+
+```
+https://api.ctgt.ai
+```
+
+---
+
+## Need Help?
+
+<CardGroup cols={3}>
+  <Card title="API Reference" icon="book" href="/api-reference/endpoint/chat-completions">
+    Detailed endpoint documentation
+  </Card>
+  
+  <Card title="Check Health" icon="heart-pulse">
+    GET /health
+  </Card>
+  
+  <Card title="Contact Sales" icon="envelope" href="https://www.ctgt.ai/contact-us">
+    Enterprise support available
+  </Card>
+</CardGroup>

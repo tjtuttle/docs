@@ -47,6 +47,21 @@
         "tab": "API Reference",
         "groups": [
           {
+            "group": "Getting Started",
+            "pages": [
+              "api-reference/getting-started",
+              "api-reference/models-pricing",
+              "api-reference/subscription-billing"
+            ]
+          },
+          {
+            "group": "API Features",
+            "pages": [
+              "api-reference/api-features",
+              "api-reference/code-examples"
+            ]
+          },
+          {
             "group": "Endpoints",
             "pages": [
               "api-reference/endpoint/chat-completions"
