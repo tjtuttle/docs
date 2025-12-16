@@ -15,7 +15,7 @@ CTGT API offers two tiers designed for different needs:
     - 20 req/min, 100 req/hour
     - 500 req/day
     - 100K tokens/day
-    - Pay-as-you-go only
+    - Pay-as-you-go 
     - No credit card required
   </Card>
   
@@ -26,7 +26,7 @@ CTGT API offers two tiers designed for different needs:
     - 100 req/min, 1,000 req/hour
     - 10,000 req/day
     - 10M tokens/day
-    - $10/month + usage
+    - Pay-as-you-go
     - Priority support
   </Card>
 </CardGroup>
@@ -248,8 +248,7 @@ print(response.json())
 **Downgrading will:**
 - Reduce rate limits immediately
 - Restrict access to only 3 free-tier models
-- Cancel your monthly subscription
-- Billing remains pay-as-you-go for usage
+- Take effect immediately
 </Warning>
 
 ---
@@ -582,14 +581,7 @@ def check_budget_alert(api_key, monthly_budget=100):
 
 ## Pricing Summary
 
-### Monthly Subscription
-
-| Tier | Monthly Fee | What's Included |
-|------|-------------|-----------------|
-| **Free** | $0 | 3 models, basic limits |
-| **Paid** | $10 | All 10 models, 100x limits |
-
-### Usage Costs (Pay-as-you-go)
+### Pay-as-you-go Pricing
 
 Both tiers pay for token usage at the same rates:
 
@@ -617,7 +609,7 @@ See the [Models & Pricing](/api-reference/models-pricing) page for complete pric
 **Monthly Cost:**
 - Input: 500 × 30 × 100 tokens = 1.5M tokens = $0.75
 - Output: 500 × 30 × 300 tokens = 4.5M tokens = $12.15
-- **Total: $12.90/month** (usage only, no subscription)
+- **Total: $12.90/month**
 
 ### Scenario 2: Medium Project (Paid Tier)
 
@@ -627,9 +619,8 @@ See the [Models & Pricing](/api-reference/models-pricing) page for complete pric
 - Mix of Gemini Flash and GPT-5
 
 **Monthly Cost:**
-- Subscription: $10
 - Usage: ~$150-200
-- **Total: $160-210/month**
+- **Total: $150-200/month**
 
 ### Scenario 3: Large Project (Paid Tier)
 
@@ -639,9 +630,8 @@ See the [Models & Pricing](/api-reference/models-pricing) page for complete pric
 - Complex queries with higher token counts
 
 **Monthly Cost:**
-- Subscription: $10
 - Usage: ~$1,500-2,500
-- **Total: $1,510-2,510/month**
+- **Total: $1,500-2,500/month**
 
 <Note>
 All scenarios assume normal usage patterns. Your costs may vary based on actual token consumption.
