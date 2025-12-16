@@ -47,7 +47,7 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "Getting Started",
+            "group": "Overview",
             "pages": [
               "api-reference/getting-started",
               "api-reference/models-pricing",
