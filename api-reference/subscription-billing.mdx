@@ -22,7 +22,7 @@ CTGT API offers two tiers designed for different needs:
   <Card title="Paid Tier" icon="crown">
     **For production applications**
     
-    - All 11 AI models
+    - All 10 AI models
     - 100 req/min, 1,000 req/hour
     - 10,000 req/day
     - 10M tokens/day
@@ -41,7 +41,7 @@ CTGT API offers two tiers designed for different needs:
 | **Requests per hour** | 100 | 1,000 | **10x** |
 | **Requests per day** | 500 | 10,000 | **20x** |
 | **Tokens per day** | 100,000 | 10,000,000 | **100x** |
-| **Available models** | 3 | 11 | **3.6x** |
+| **Available models** | 3 | 10 | **3.6x** |
 
 <Note>
 Rate limits reset at the start of each time period (minute, hour, day).
@@ -127,7 +127,7 @@ console.log(data);
     "tokens_per_day": 10000000
   },
   "available_models": [
-    // All 11 models listed
+    // All 10 models listed
   ],
   "upgrade_url": null
 }
@@ -587,7 +587,7 @@ def check_budget_alert(api_key, monthly_budget=100):
 | Tier | Monthly Fee | What's Included |
 |------|-------------|-----------------|
 | **Free** | $0 | 3 models, basic limits |
-| **Paid** | $10 | All 11 models, 100x limits |
+| **Paid** | $10 | All 10 models, 100x limits |
 
 ### Usage Costs (Pay-as-you-go)
 
@@ -653,7 +653,7 @@ All scenarios assume normal usage patterns. Your costs may vary based on actual 
 
 <CardGroup cols={2}>
   <Card title="View All Models" icon="layer-group" href="/api-reference/models-pricing">
-    Compare all 11 models and their pricing
+    Compare all 10 models and their pricing
   </Card>
   
   <Card title="API Features" icon="wand-magic-sparkles" href="/api-reference/api-features">
