@@ -169,7 +169,6 @@ Unlock all models with a paid subscription:
 
 ---
 
----
 
 ## Switching Between Models
 
@@ -198,37 +197,6 @@ curl -X POST https://api.ctgt.ai/v1/chat/completions \
 ```
 
 </CodeGroup>
-
----
-
-## Model Availability Check
-
-You can check which models are available for your tier:
-
-```bash
-curl https://api.ctgt.ai/v1/subscription/info \
-  -H "Authorization: Bearer sk-ctgt-YOUR_API_KEY"
-```
-
-**Response includes:**
-```json
-{
-  "subscription_tier": "free",
-  "available_models": [
-    {
-      "model": "gemini-2.5-flash",
-      "display_name": "Gemini 2.5 Flash",
-      "tier": "free",
-      "pricing": {
-        "input": 0.40,
-        "output": 2.60
-      }
-    }
-  ]
-}
-```
-
----
 
 ## Upgrade to Access All Models
 
